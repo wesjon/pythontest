@@ -1,10 +1,6 @@
 import unittest
-from app import Account
-from app import Bank
-from app import InvalidArgsException
-from app import InvalidFormatException
+from models import Account, Bank, InvalidArgsException, InvalidFormatException, IOException
 from app import checkArgs
-from app import IOException
 
 class TestDindaBank(unittest.TestCase):
     def setUp(self):
@@ -21,12 +17,20 @@ class TestDindaBank(unittest.TestCase):
         self.bank.loadAccountsFromCsv('test_resources/empty_accounts.csv')
         self.assertEquals(len(self.bank.accounts), 0)
 
+    def test_load_accounts_from_valid_file(self):
+        self.bank.loadAccountsFromCsv('test_resources/valid_accounts.csv')
+        self.assertEquals(len(self.bank.accounts), 1)
+
     def test_load_invalid_accounts_file(self):
         self.assertRaises(InvalidFormatException, self.bank.loadAccountsFromCsv, 'test_resources/invalid_accounts_missing_value.csv')
         self.assertRaises(InvalidFormatException, self.bank.loadAccountsFromCsv, 'test_resources/invalid_accounts_missing_key.csv')
 
     def test_process_non_existent_transaction_file(self):
         self.assertRaises(IOException, self.bank.processTransactionsFromCsv, 'non_existent_file.csv')
+
+    def test_process_and_match_account_with_transactions(self):
+        self.test_load_accounts_from_valid_file()
+        self.bank.processTransactionsFromCsv('test_resources/valid_transactions.csv')
 
     def test_process_transaction_file_with_no_transactions(self):
         self.bank.processTransactionsFromCsv('test_resources/empty_transactions.csv')
